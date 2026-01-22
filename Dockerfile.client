@@ -1,0 +1,27 @@
+# Dockerfile for On-Premise Client
+FROM python:3.11-slim
+
+WORKDIR /app
+
+# Copy requirements
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy client code
+COPY client.py .
+
+# Create non-root user
+RUN useradd -m -s /bin/bash clientuser && chown -R clientuser:clientuser /app
+
+# Switch to non-root user
+USER clientuser
+
+# Set HOME environment variable (important for path expansion)
+ENV HOME=/home/clientuser \
+    PYTHONUNBUFFERED=1
+
+# Run client using environment variables
+CMD python /app/client.py \
+    --server ${SERVER_URL} \
+    --client-id ${CLIENT_ID} \
+    --chunk-size ${CHUNK_SIZE}

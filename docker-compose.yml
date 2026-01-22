@@ -1,0 +1,85 @@
+version: '3.8'
+
+services:
+  # Cloud Server
+  server:
+    build:
+      context: .
+      dockerfile: Dockerfile.server
+    container_name: server-download
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./downloads:/app/downloads
+    environment:
+      - SERVER_HOST=0.0.0.0
+      - SERVER_PORT=8080
+    networks:
+      - download-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+
+  # On-Premise Client 1 (Restaurant 1)
+  client-restaurant-001:
+    build:
+      context: .
+      dockerfile: Dockerfile.client
+    container_name: client-restaurant-001
+    depends_on:
+      server:
+        condition: service_healthy
+    volumes:
+      - ./test-files/restaurant-001:/home/clientuser
+    environment:
+      - SERVER_URL=http://server:8080
+      - CLIENT_ID=restaurant-001
+      - CHUNK_SIZE=1048576
+    networks:
+      - download-network
+    restart: unless-stopped
+
+  # On-Premise Client 2 (Restaurant 2)
+  client-restaurant-002:
+    build:
+      context: .
+      dockerfile: Dockerfile.client
+    container_name: client-restaurant-002
+    depends_on:
+      server:
+        condition: service_healthy
+    volumes:
+      - ./test-files/restaurant-002:/home/clientuser
+    environment:
+      - SERVER_URL=http://server:8080
+      - CLIENT_ID=restaurant-002
+      - CHUNK_SIZE=1048576
+    networks:
+      - download-network
+    restart: unless-stopped
+
+  # On-Premise Client 3 (Restaurant 3)
+  client-restaurant-003:
+    build:
+      context: .
+      dockerfile: Dockerfile.client
+    container_name: client-restaurant-003
+    depends_on:
+      server:
+        condition: service_healthy
+    volumes:
+      - ./test-files/restaurant-003:/home/clientuser
+    environment:
+      - SERVER_URL=http://server:8080
+      - CLIENT_ID=restaurant-003
+      - CHUNK_SIZE=1048576
+    networks:
+      - download-network
+    restart: unless-stopped
+
+networks:
+  download-network:
+    driver: bridge

@@ -1,0 +1,29 @@
+# Dockerfile for Cloud Server
+FROM python:3.11-slim
+
+# Install dependencies
+RUN apt-get update && \
+    apt-get install -y curl && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+# Copy requirements
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy server code
+COPY server.py .
+
+# Create downloads directory
+RUN mkdir -p /app/downloads
+
+# Expose port
+EXPOSE 8080
+
+# Enable unbuffered Python output for Docker logs
+ENV PYTHONUNBUFFERED=1
+
+# Run server
+CMD ["python", "server.py", "server", "--host", "0.0.0.0", "--port", "8080", "--download-dir", "/app/downloads"]
