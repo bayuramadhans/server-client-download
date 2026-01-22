@@ -1,0 +1,24 @@
+cat > .gitignore << 'EOF'
+# Test files and downloads
+test-files/
+downloads/
+checksums.txt
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+ENV/
+
+# Docker
+.docker/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+EOF
